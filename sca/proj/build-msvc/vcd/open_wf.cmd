@@ -1,0 +1,1 @@
+start gtkwave.exe aadc.vcd aadc.gtkw

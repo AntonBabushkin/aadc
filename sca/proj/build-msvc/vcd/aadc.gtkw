@@ -1,0 +1,48 @@
+[*]
+[*] GTKWave Analyzer v3.3.95 (w)1999-2018 BSI
+[*] Tue Jan 01 21:19:13 2019
+[*]
+[dumpfile] "aadc.vcd"
+[dumpfile_mtime] "Tue Jan 01 21:09:20 2019"
+[dumpfile_size] 250784
+[savefile] "aadc.gtkw"
+[timestart] 0
+[size] 1536 801
+[pos] -87 -9
+*-24.339085 2000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 43
+[signals_width] 204
+[sst_expanded] 0
+[sst_vpaned_height] 221
+@28
+SystemC_AMS.\aadc.clk
+SystemC_AMS.\aadc.start
+@420
+SystemC_AMS.\aadc.cnt
+@28
+SystemC_AMS.\aadc.done
+@20000
+-
+@28
+SystemC_AMS.\aadc.vref
+@20000
+-
+@28
+SystemC_AMS.\aadc.p
+SystemC_AMS.\aadc.q
+SystemC_AMS.\aadc.ana_core.vdac
+@8028
+SystemC_AMS.\aadc.ana_core.vres
+@20000
+-
+@420
+SystemC_AMS.\aadc.code
+@8420
+SystemC_AMS.\aadc.code
+@20000
+-
+-
+@28
+SystemC_AMS.\aadc.vin
+[pattern_trace] 1
+[pattern_trace] 0
