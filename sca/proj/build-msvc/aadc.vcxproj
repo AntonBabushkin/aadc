@@ -18,6 +18,9 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\sc_main.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{55D8968D-43A4-4D5B-B06B-8E8146A3777C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -89,7 +92,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;NOGDI;%(PreprocessorDefinitions);_USE_MATH_DEFINES</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SYSTEMC_AMS_HOME)\src;$(SYSTEMC_HOME)\src;..\inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SYSTEMC_AMS_HOME)\src;$(SYSTEMC_HOME)\src;..\inc</AdditionalIncludeDirectories>
       <RuntimeTypeInfo>Yes</RuntimeTypeInfo>
       <AdditionalOptions>/vmg %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -155,9 +158,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="../src/main.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

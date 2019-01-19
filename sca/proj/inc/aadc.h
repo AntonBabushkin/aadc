@@ -3,6 +3,7 @@
 #include <systemc>
 #include <systemc-ams>
 
+#include "aadc_if.h"
 
 // Include ADC components definition
 #include "digital_core.h"
@@ -17,7 +18,7 @@ class aadc : sc_core::sc_module
 
 public:
 	// ADC ports
-	sc_core::sc_in_clk clk;
+	sc_core::sc_in<bool> clk;
 	sc_core::sc_in<bool> start;
 	sca_tdf::sca_in<double> vin, vref;
 	sc_core::sc_out<int16_t> code;
@@ -33,8 +34,10 @@ public:
 	analog_core ana_core;				// (TDF domain)
 
 	// Class (SystemC module) constructor
-	aadc(const sc_core::sc_module_name& name, uint16_t n_bits_ = 10)
+	aadc(const sc_core::sc_module_name& name, uint16_t n_bits_=10)
 		: sc_module(name) // Construct parent
+		// Initialize local variable
+		
 		// ADC components creation
 		, dig_core("digital_core", n_bits_)
 		, ana_core("analog_core")

@@ -9,7 +9,7 @@ class digital_core : sc_core::sc_module
 public:
 
 	// Ports declaration
-	sc_core::sc_in_clk clk;
+	sc_core::sc_in<bool> clk;
 	sc_core::sc_in<bool> start;			// Start conversion
 	sc_core::sc_in<bool> p, q;
 	sc_core::sc_out<uint16_t> cnt;

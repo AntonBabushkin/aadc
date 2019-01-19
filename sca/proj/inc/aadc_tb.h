@@ -3,6 +3,7 @@
 #include <systemc>
 #include <systemc-ams>
 
+#include "aadc_if.h"
 #include "tdf_de_converters.h"
 
 
@@ -11,21 +12,20 @@ class aadc_tb : sc_core::sc_module
 {
 
 public:
-
-	sc_core::sc_in_clk adc_clk;
-	sc_core::sc_out<bool> adc_start;
-	sca_tdf::sca_out<double> adc_vin, adc_vref;
-	sc_core::sc_in<int16_t> adc_code;
-	sc_core::sc_in<bool> adc_done;
+	
+	// ADC virtual interface
+	aadc_if* aadc_vif;
 
 	de2tdf<double> de2tdf_vin;
 	de2tdf<double> de2tdf_vref;
 
 	// Class (SystemC module) constructor
 	SC_HAS_PROCESS(aadc_tb);
-	aadc_tb(const sc_core::sc_module_name& name, sca_core::sca_time st_base_ = sca_core::sca_time(1000.0, sc_core::SC_NS), uint16_t n_bits_ = 10, double vref_ = 1.0)
+	aadc_tb(const sc_core::sc_module_name& name, aadc_if* aadc_vif_ = nullptr, sca_core::sca_time st_base_=sca_core::sca_time(1000.0, sc_core::SC_NS), uint16_t n_bits_=10, double vref_=1.0)
 		: sc_module(name) // Construct parent
 		// Initialize local variable
+		, aadc_vif(aadc_vif_)
+		, st_base(st_base_)
 		, n_bits(n_bits_)
 		, vref(vref_)
 		// Construct modules (and assign sampling time for TDF data producers)
@@ -33,22 +33,25 @@ public:
 		, de2tdf_vref("de2tdf_vref", st_base_)
 	{
 		de2tdf_vin.in(vin_de);
-		de2tdf_vin.out(adc_vin);
+		de2tdf_vin.out(aadc_vif->vin);
 		
 		de2tdf_vref.in(vref_de);
-		de2tdf_vref.out(adc_vref);
+		de2tdf_vref.out(aadc_vif->vref);
+
+		SC_THREAD(do_clk_gen);
 
 		SC_THREAD(do_stimuli);
-		sensitive << adc_clk.pos();
+		sensitive << aadc_vif->clk.posedge_event();
 		dont_initialize();
 		
 		SC_METHOD(do_check);
-		sensitive << adc_clk.pos();
+		sensitive << aadc_vif->clk.posedge_event();
 		dont_initialize();
 	}
 
 protected:
 	// Local variables
+	sca_core::sca_time st_base;
 	uint16_t n_bits;
 	double vref;
 	double vin = 0;
@@ -57,6 +60,19 @@ protected:
 	sc_core::sc_signal<double> vin_de, vref_de;
 
 	// Local methods
+
+	void do_clk_gen() {
+		// Wait for clock intialization time
+		aadc_vif->clk.write(false);
+		wait(st_base);
+		// Start clock generation
+		while (true) {
+			aadc_vif->clk.write(true);
+			wait(st_base / 2);
+			aadc_vif->clk.write(false);
+			wait(st_base / 2);
+		}
+	}
 
 	void do_stimuli() {
 
@@ -68,9 +84,9 @@ protected:
 			vin_de = vin;
 			vref_de = vref;
 			wait();
-			adc_start.write(true);
+			aadc_vif->start.write(true);
 			wait();
-			adc_start.write(false);
+			aadc_vif->start.write(false);
 
 			// Wait conversion finished
 			wait(n_bits-1);
@@ -89,22 +105,22 @@ protected:
 		static bool done_prev = 0, start_prev = 0;
 		
 		// Calculate expected ADC code
-		if (!start_prev && adc_start.read()) {
-			// adc_start rose
+		if (!start_prev && aadc_vif->start.read()) {
+			// aadc_vif->start rose
 			expected_code = std::round((vin_de.read() / vref_de.read()) * pow(2, n_bits));
 			if (expected_code == -1024) expected_code = -1023;// Algorithmic ADC doesn't produce code -1024
 		}
 
 		// Get conversion result and check vs expected value
-		if (!done_prev && adc_done.read()) {
+		if (!done_prev && aadc_vif->done.read()) {
 			// adc_done rose
-			if (adc_code.read() != expected_code) {
-				std::cout << "ADC code mismatch " << "Exp[" << expected_code << "], Got[" << adc_code.read() << "] at time " << sc_core::sc_time_stamp() << std::endl;
+			if (aadc_vif->code.read() != expected_code) {
+				std::cout << "ADC code mismatch " << "Exp[" << expected_code << "], Got[" << aadc_vif->code.read() << "] at time " << sc_core::sc_time_stamp() << std::endl;
 			}
 		}
 
-		start_prev = adc_start.read();
-		done_prev = adc_done.read();
+		start_prev = aadc_vif->start.read();
+		done_prev = aadc_vif->done.read();
 	}
 
 };

@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# MS Studio db files
+/**/build-msvc/*.opendb
+/**/build-msvc/*.db
+
+# Build directories
+/**/build-msvc/Release/
+/**/build-msvc/Debug/
+
