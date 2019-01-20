@@ -33,5 +33,5 @@ public:
 
 protected:
 	double integ_gain;// Integator gain
-	double integ_gain_error = 0.0;// Integrator gain error, in %
+	double integ_gain_error = 0.1;// Integrator gain error, in %
 };
