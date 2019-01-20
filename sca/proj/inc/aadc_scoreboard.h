@@ -4,6 +4,7 @@
 #include <systemc-ams>
 
 #include "aadc_if.h"
+#include "aadc_cnfg.h"
 #include "tdf_de_converters.h"
 
 // This class is a SystemC module
@@ -14,7 +15,7 @@ public:
 
 	// Class (SystemC module) constructor
 	SC_HAS_PROCESS(aadc_scoreboard);
-	aadc_scoreboard(const sc_core::sc_module_name& name, bool* enable_checker = nullptr, aadc_if* aadc_vif_ = nullptr
+	aadc_scoreboard(const sc_core::sc_module_name& name, bool* enable_checker = nullptr, aadc_if* aadc_vif_ = nullptr, aadc_cnfg* aadc_cfg_ = nullptr
 			, sca_core::sca_time st_base_ = sca_core::sca_time(1000.0, sc_core::SC_NS)
 			, uint16_t n_bits_ = 10, double vref_ = 1.0)
 		: sc_module(name) // Construct parent

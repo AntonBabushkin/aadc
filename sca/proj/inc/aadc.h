@@ -3,7 +3,7 @@
 #include <systemc>
 #include <systemc-ams>
 
-#include "aadc_if.h"
+#include "aadc_cnfg.h"
 
 // Include ADC components definition
 #include "digital_core.h"
@@ -34,13 +34,13 @@ public:
 	analog_core ana_core;				// (TDF domain)
 
 	// Class (SystemC module) constructor
-	aadc(const sc_core::sc_module_name& name, uint16_t n_bits_=10)
+	aadc(const sc_core::sc_module_name& name, aadc_cnfg* aadc_cfg_ = nullptr, uint16_t n_bits_=10)
 		: sc_module(name) // Construct parent
 		// Initialize local variable
 		
 		// ADC components creation
 		, dig_core("digital_core", n_bits_)
-		, ana_core("analog_core")
+		, ana_core("analog_core", aadc_cfg_)
 	{
 		
 		// ADC core components interconnect

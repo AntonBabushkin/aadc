@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "aadc_if.h"
+#include "aadc_cnfg.h"
 #include "tinymatwriter.h"
 
 #define CREATE_MAT_FILE_FOR_POST_PROCESSING
@@ -26,11 +27,12 @@ public:
 
 	// Class (SystemC module) constructor
 	SC_HAS_PROCESS(tc_2);
-	tc_2(const sc_core::sc_module_name& name, bool* enable_checker = nullptr, aadc_if* aadc_vif_ = nullptr
+	tc_2(const sc_core::sc_module_name& name, bool* enable_checker = nullptr, aadc_if* aadc_vif_ = nullptr, aadc_cnfg* aadc_cfg_ = nullptr
 			, sca_core::sca_time st_base_ = sca_core::sca_time(1000.0, sc_core::SC_NS)
 			, uint16_t n_bits_ = 10, double vref_ = 1.0)
 		: sc_module(name) // Construct parent
 		// Initialize local variable
+		, aadc_cfg(aadc_cfg_)
 		, enable_checker(enable_checker)
 		, aadc_vif(aadc_vif_)
 		, st_base(st_base_)
@@ -57,7 +59,7 @@ public:
 
 protected:
 	// Local variables
-	
+	aadc_cnfg* aadc_cfg;
 	bool* enable_checker;
 	aadc_if* aadc_vif;				// ADC virtual interface
 
@@ -73,6 +75,10 @@ protected:
 	// Local methods
 
 	void do_stimuli() {
+
+		// Measure DNL for several integrator gain errors
+
+		aadc_cfg->integ_gain_error = 0.1;
 
 		// Test case 2: Measure DNL (sweep voltage at ADC input from -Vref to +Vref with fine step (Vref/2^n_bits)/10)
 		vin = -1.0*vref;
@@ -109,7 +115,7 @@ protected:
 #ifdef CREATE_MAT_FILE_FOR_POST_PROCESSING
 		// Create .mat file using TinyMAT library https://github.com/jkriege2/TinyMAT
 		std::stringstream filename;
-		filename << "./../post_processing/" << "vin_code_dnl" << ".mat";
+		filename << "./../analysis/" << "vin_code_dnl" << ".mat";
 		TinyMATWriterFile* mat = TinyMATWriter_open(filename.str().c_str());
 		if (mat) {
 			// Convert vector to double array
