@@ -37,11 +37,13 @@ public:
 	aadc aadc;							// Algorithmic ADC module
 	clk_gen clk_gen;					// Clock generator
 	aadc_scoreboard aadc_scoreboard;	// Scoreboard
-	tc_2 testcase;						// Test case
 
+	sc_module* testcase;
 
 	// Class (SystemC module) constructor
-	tb(const sc_core::sc_module_name& name, sca_core::sca_time st_base_ = sca_core::sca_time(1000.0, sc_core::SC_NS), uint16_t n_bits_ = 10, double vref_ = 1.0)
+	tb(const sc_core::sc_module_name& name, std::string tc_name
+			, sca_core::sca_time st_base_ = sca_core::sca_time(1000.0, sc_core::SC_NS)
+			, uint16_t n_bits_ = 10, double vref_ = 1.0)
 		: sc_module(name) // Construct parent
 		// Initialize local variable
 		, st_base(st_base_)
@@ -53,8 +55,11 @@ public:
 		, aadc("aadc", n_bits_)
 		, clk_gen("clk_gen", st_base_)
 		, aadc_scoreboard("aadc_scoreboard", &enable_checker, aadc_vif, st_base_, n_bits_, vref_)
-		, testcase("testcase", &enable_checker, aadc_vif, st_base_, n_bits_, vref_)
 	{
+		// Create test
+		if (tc_name == "tc_1") testcase = new tc_1("testcase", &enable_checker, aadc_vif, st_base_, n_bits_, vref_);
+		if (tc_name == "tc_2") testcase = new tc_2("testcase", &enable_checker, aadc_vif, st_base_, n_bits_, vref_);
+
 		// TDF drive side connector
 		de2tdf_vin.in(aadc_vif->vin_drive);
 		de2tdf_vin.out(vin_tdf);

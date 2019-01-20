@@ -7,7 +7,7 @@
 
 
 // This class is a SystemC module
-class tc_1 : sc_core::sc_module
+class tc_1 : public sc_core::sc_module
 {
 
 public:
@@ -26,6 +26,8 @@ public:
 		, n_bits(n_bits_)
 		, vref(vref_)
 	{
+		std::cout << "Executing test tc_1" << std::endl;
+
 		SC_THREAD(do_stimuli);
 		sensitive << aadc_vif->clk.posedge_event();
 		dont_initialize();

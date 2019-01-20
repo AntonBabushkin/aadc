@@ -11,7 +11,7 @@
 #define CREATE_MAT_FILE_FOR_POST_PROCESSING
 
 // This class is a SystemC module
-class tc_2 : sc_core::sc_module
+class tc_2 : public sc_core::sc_module
 {
 
 public:
@@ -39,6 +39,8 @@ public:
 	{
 		*enable_checker = false;// Disable checker
 		fine_step = 10;	// Amount of voltage steps between two ADC codes = DNL granularity in fractions of LSB
+
+		std::cout << "Executing test tc_2" << std::endl;
 
 		SC_THREAD(do_stimuli);
 		sensitive << aadc_vif->clk.posedge_event();
