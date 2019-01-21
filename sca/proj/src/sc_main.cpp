@@ -94,7 +94,7 @@ int sc_main (int argc, char* argv[])
 	// Start simulation
 	std::cout << "Starting simulation..." << std::endl;
 	clock_t begin = clock();
-	sc_start(5000, sc_core::SC_MS);
+	sc_start(5000000, sc_core::SC_MS);
 
 	// End of simulation
 	if (create_vcd) sca_util::sca_close_vcd_trace_file(vcdfile);

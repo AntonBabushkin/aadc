@@ -7,9 +7,8 @@
 
 #include "aadc_if.h"
 #include "aadc_cnfg.h"
-#include "tinymatwriter.h"
 
-#define CREATE_MAT_FILE_FOR_POST_PROCESSING
+#define CREATE_CSV_FILE_FOR_POST_PROCESSING
 
 // This class is a SystemC module
 class tc_2 : public sc_core::sc_module
@@ -76,64 +75,59 @@ protected:
 
 	void do_stimuli() {
 
-		// Measure DNL for several integrator gain errors
+		// Test case 2: Measure DNL for several integrator gain errors
+		std::vector<double> gain_error_vect = { 0.0, 0.01, 0.05, 0.1, 0.5, 1.0 };
 
-		aadc_cfg->integ_gain_error = 0.1;
+		for (auto const& gain_error : gain_error_vect) {
+			aadc_cfg->integ_gain_error = gain_error;
+			std::cout << "Measuring DNL with amplifier gain error = " << gain_error << " %" << std::endl;
 
-		// Test case 2: Measure DNL (sweep voltage at ADC input from -Vref to +Vref with fine step (Vref/2^n_bits)/10)
-		vin = -1.0*vref;
-		vin_code_dnl_tbl.clear();
-		for (unsigned int i = 0; i < (2 * pow(2, n_bits)) * fine_step + 1; i++) {
-			// Apply input voltage, reference and start adc conversion
-			aadc_vif->vin_drive.write(vin);
-			aadc_vif->vref_drive.write(vref);
-			wait();
-			aadc_vif->start.write(true);
-			wait();
-			aadc_vif->start.write(false);
+			// Measure DNL (sweep voltage at ADC input from -Vref to +Vref with fine step (Vref/2^n_bits)/10)
+			vin = -1.0*vref;
+			vin_code_dnl_tbl.clear();
+			for (unsigned int i = 0; i < (2 * pow(2, n_bits)) * fine_step + 1; i++) {
+				// Apply input voltage, reference and start adc conversion
+				aadc_vif->vin_drive.write(vin);
+				aadc_vif->vref_drive.write(vref);
+				wait();
+				aadc_vif->start.write(true);
+				wait();
+				aadc_vif->start.write(false);
 
-			// Wait conversion finished
-			wait(n_bits - 1);
+				// Wait conversion finished
+				wait(n_bits - 1);
 
-			// Increnent voltage
-			vin += (vref / pow(2, n_bits)) / fine_step;
+				// Increnent voltage
+				vin += (vref / pow(2, n_bits)) / fine_step;
 
-		}
-
-		// Find max DNL error
-		int max_idx;
-		for (auto i = vin_code_dnl_tbl.begin(); i != vin_code_dnl_tbl.end(); i++)
-		{
-			static double max_dnl = 0;
-			if (max_dnl < i->dnl) {
-				max_dnl = i->dnl;
-				max_idx = i - vin_code_dnl_tbl.begin();
 			}
-		}
-		std::cout << "Max DNL error " << (vin_code_dnl_tbl[max_idx].dnl - 1.0) << " LSB at code " << vin_code_dnl_tbl[max_idx].code << std::endl;
 
-#ifdef CREATE_MAT_FILE_FOR_POST_PROCESSING
-		// Create .mat file using TinyMAT library https://github.com/jkriege2/TinyMAT
-		std::stringstream filename;
-		filename << "./../analysis/" << "vin_code_dnl" << ".mat";
-		TinyMATWriterFile* mat = TinyMATWriter_open(filename.str().c_str());
-		if (mat) {
-			// Convert vector to double array
-			double* vin_code_dnl_arr = new double[vin_code_dnl_tbl.size()*3];
+			// Find max DNL error
+			int max_idx;
+			for (auto i = vin_code_dnl_tbl.begin(); i != vin_code_dnl_tbl.end(); i++)
+			{
+				static double max_dnl = 0;
+				if (std::abs(max_dnl) < std::abs(i->dnl)) {
+					max_dnl = i->dnl;
+					max_idx = i - vin_code_dnl_tbl.begin();
+				}
+			}
+			std::cout << "Max DNL error " << (vin_code_dnl_tbl[max_idx].dnl - 1.0) << " LSB at code " << vin_code_dnl_tbl[max_idx].code << std::endl;
+
+#ifdef CREATE_CSV_FILE_FOR_POST_PROCESSING
+			std::stringstream filename;
+			std::string gain_error_str = std::to_string(gain_error);
+			std::replace(gain_error_str.begin(), gain_error_str.end(), '.', 'p');
+			filename << "./../analysis/" << "vin_code_dnl_" << gain_error_str << ".csv";
+			std::ofstream myfile;
+			myfile.open(filename.str());
+
 			for (auto const& value : vin_code_dnl_tbl) {
-				static int i = 0;
-				vin_code_dnl_arr[i] = value.vin;
-				vin_code_dnl_arr[i+1] = value.code;
-				vin_code_dnl_arr[i+2] = value.dnl;
-				i += 3;
+				myfile << value.vin << "," << value.code << "\n";
 			}
-			int32_t arr_size[3] = { 3,(int32_t)vin_code_dnl_tbl.size(),1 };
-			TinyMATWriter_writeMatrixND_rowmajor(mat, "vin_code_dnl", vin_code_dnl_arr, arr_size, 2);
-			delete[] vin_code_dnl_arr;
-			TinyMATWriter_close(mat);
+			myfile.close();
+#endif // CREATE_CSV_FILE_FOR_POST_PROCESSING
 		}
-#endif // CREATE_MAT_FILE_FOR_POST_PROCESSING
-
 
 		// Stop simulation
 		sc_core::sc_stop();

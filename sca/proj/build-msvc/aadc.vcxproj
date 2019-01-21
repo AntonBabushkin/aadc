@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\sc_main.cpp" />
-    <ClCompile Include="..\src\tinymatwriter.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{55D8968D-43A4-4D5B-B06B-8E8146A3777C}</ProjectGuid>

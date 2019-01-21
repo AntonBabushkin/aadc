@@ -39,6 +39,6 @@
 /**/build-msvc/Release/
 /**/build-msvc/Debug/
 
-# MATLAB generated files
-*.mat
+# Generated CSV files
+/**/analysis/*.csv
 
