@@ -12,6 +12,7 @@
 #include "aadc_scoreboard.h"
 #include "tc_1.h"
 #include "tc_2.h"
+#include "tc_3.h"
 
 
 
@@ -62,6 +63,7 @@ public:
 		// Create test
 		if (tc_name == "tc_1") testcase = new tc_1("testcase", &enable_checker, aadc_vif, aadc_cfg, st_base_, n_bits_, vref_);
 		if (tc_name == "tc_2") testcase = new tc_2("testcase", &enable_checker, aadc_vif, aadc_cfg, st_base_, n_bits_, vref_);
+		if (tc_name == "tc_3") testcase = new tc_3("testcase", &enable_checker, aadc_vif, aadc_cfg, st_base_, n_bits_, vref_);
 
 		// TDF drive side connector
 		de2tdf_vin.in(aadc_vif->vin_drive);
