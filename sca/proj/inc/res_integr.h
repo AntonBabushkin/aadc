@@ -22,7 +22,7 @@ public:
 	// Class (SystemC-AMS MoC) constructor
 	res_integr(sc_core::sc_module_name nm) :
 		// Initialize parameters
-		gain_err("gain_err", 0.1, "Amplifier gain error, in %")
+		gain_err("gain_err", 0.0, "Amplifier gain error, in %")
 		// Construct ports
 		, vsh("vsh"), vdac("vdac"), vres("vres")
 	{ }
