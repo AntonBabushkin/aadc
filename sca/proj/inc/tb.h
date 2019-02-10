@@ -8,7 +8,6 @@
 #include "clk_gen.h"
 
 #include "aadc_if.h"
-#include "aadc_cnfg.h"
 #include "aadc_scoreboard.h"
 #include "tc_1.h"
 #include "tc_2.h"
@@ -17,7 +16,7 @@
 
 
 // This class is a SystemC module
-class tb : sc_core::sc_module
+class tb : public sc_core::sc_module
 {
 
 public:
@@ -25,8 +24,6 @@ public:
 
 	// ADC virtual interface
 	aadc_if* aadc_vif = new aadc_if("aadc_vif");
-
-	aadc_cnfg* aadc_cfg = new aadc_cnfg("aadc_cfg");
 
 	sca_tdf::sca_signal<double> vin_tdf{ "vin_tdf" };		// Input voltage
 	sca_tdf::sca_signal<double> vref_tdf{ "vref_tdf" };		// Reference voltage
@@ -50,20 +47,23 @@ public:
 			, uint16_t n_bits_ = 10, double vref_ = 1.0)
 		: sc_module(name) // Construct parent
 		// Initialize local variables
-		, st_base(st_base_)
-		, n_bits(n_bits_)
-		, vref(vref_)
+
 		// Construct modules
 		, de2tdf_vin("de2tdf_vin", st_base_)
 		, de2tdf_vref("de2tdf_vref", st_base_)
-		, aadc("aadc", aadc_cfg, n_bits_)
+		, aadc("aadc")
 		, clk_gen("clk_gen", st_base_)
-		, aadc_scoreboard("aadc_scoreboard", &enable_checker, aadc_vif, aadc_cfg, st_base_, n_bits_, vref_)
+		, aadc_scoreboard("aadc_scoreboard", &enable_checker, aadc_vif, st_base_, vref_)
 	{
+		
 		// Create test
-		if (tc_name == "tc_1") testcase = new tc_1("testcase", &enable_checker, aadc_vif, aadc_cfg, st_base_, n_bits_, vref_);
-		if (tc_name == "tc_2") testcase = new tc_2("testcase", &enable_checker, aadc_vif, aadc_cfg, st_base_, n_bits_, vref_);
-		if (tc_name == "tc_3") testcase = new tc_3("testcase", &enable_checker, aadc_vif, aadc_cfg, st_base_, n_bits_, vref_);
+		if (tc_name == "tc_1") testcase = new tc_1("testcase", &enable_checker, aadc_vif, st_base_, vref_);
+		if (tc_name == "tc_2") testcase = new tc_2("testcase", &enable_checker, aadc_vif, st_base_, vref_);
+		if (tc_name == "tc_3") testcase = new tc_3("testcase", &enable_checker, aadc_vif, st_base_, vref_);
+		
+		// Configure AADC (DUT)
+		cci::cci_broker_handle m_broker(cci::cci_get_broker());
+		m_broker.get_param_handle("tb.aadc.n_bits").set_cci_value(cci::cci_value(n_bits_));
 
 		// TDF drive side connector
 		de2tdf_vin.in(aadc_vif->vin_drive);
@@ -92,9 +92,6 @@ public:
 
 protected:
 	// Local variables
-	sca_core::sca_time st_base;
-	uint16_t n_bits;
-	double vref;
 
 	// Local methods
 

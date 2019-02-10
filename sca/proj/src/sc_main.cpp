@@ -1,6 +1,7 @@
 
 #include <systemc>
 #include <systemc-ams>
+#include <cci_utils/broker.h>
 
 #include <ctime>
 
@@ -55,6 +56,8 @@ int sc_main (int argc, char* argv[])
 	std::string tc_name = "tc_1";
 	if (test_case_name) tc_name = args::get(test_case_name);
 
+	
+	cci::cci_register_broker(new cci_utils::broker("global_config_broker"));
 
 
 	// Set ADC parameters
@@ -62,7 +65,6 @@ int sc_main (int argc, char* argv[])
 	double adc_clk_freq = 0.001;// ADC clock frequency in MHz
 	uint16_t adc_n_bit = 10;// ADC number of bits
 	sca_core::sca_time st_base((1 / adc_clk_freq), sc_core::SC_NS);// Base sample time of TDF modules
-	
 	
 	// Instantiate Test Bench
 	tb tb("tb", tc_name, st_base, adc_n_bit, vref);
@@ -90,6 +92,11 @@ int sc_main (int argc, char* argv[])
 		sca_trace(vcdfile, tb.aadc.code_raw, "aadc.code_raw");
 		if(tc_name == "tc_2") sca_trace(vcdfile, static_cast<tc_2*>(tb.testcase)->dnl_in_bits, "tb.testcase.dnl_in_bits");
 	}
+
+	std::vector<sc_core::sc_object*> children = tb.get_child_objects();
+	// Print out names and kinds of top-level objects
+	for (unsigned i = 0; i < children.size(); i++)
+		std::cout << children[i]->name() << " " << children[i]->kind() << std::endl;
 
 	// Start simulation
 	std::cout << "Starting simulation..." << std::endl;

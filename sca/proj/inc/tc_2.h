@@ -2,11 +2,11 @@
 
 #include <systemc>
 #include <systemc-ams>
+#include <cci_configuration>
 
 #include <vector>
 
 #include "aadc_if.h"
-#include "aadc_cnfg.h"
 
 #define CREATE_CSV_FILE_FOR_POST_PROCESSING
 
@@ -26,16 +26,16 @@ public:
 
 	// Class (SystemC module) constructor
 	SC_HAS_PROCESS(tc_2);
-	tc_2(const sc_core::sc_module_name& name, bool* enable_checker = nullptr, aadc_if* aadc_vif_ = nullptr, aadc_cnfg* aadc_cfg_ = nullptr
+	tc_2(const sc_core::sc_module_name& name, bool* enable_checker = nullptr, aadc_if* aadc_vif_ = nullptr
 			, sca_core::sca_time st_base_ = sca_core::sca_time(1000.0, sc_core::SC_NS)
-			, uint16_t n_bits_ = 10, double vref_ = 1.0)
+			, double vref_ = 1.0)
 		: sc_module(name) // Construct parent
+		// Get CCI configuration handle specific for this module
+		, m_broker(cci::cci_get_broker())
 		// Initialize local variable
-		, aadc_cfg(aadc_cfg_)
 		, enable_checker(enable_checker)
 		, aadc_vif(aadc_vif_)
 		, st_base(st_base_)
-		, n_bits(n_bits_)
 		, vref(vref_)
 	{
 		*enable_checker = false;// Disable checker
@@ -56,14 +56,15 @@ public:
 
 	}
 
+private:
+	cci::cci_broker_handle m_broker; // CCI configuration handle
+
 protected:
 	// Local variables
-	aadc_cnfg* aadc_cfg;
 	bool* enable_checker;
 	aadc_if* aadc_vif;				// ADC virtual interface
 
 	sca_core::sca_time st_base;
-	uint16_t n_bits;
 	double vref;
 	int fine_step;
 	double vin = 0;
@@ -79,12 +80,14 @@ protected:
 		std::vector<double> gain_error_vect = { 0.0, 0.01, 0.05, 0.1, 0.5, 1.0 };
 
 		for (auto const& gain_error : gain_error_vect) {
-			aadc_cfg->integ_gain_error = gain_error;
+
+			m_broker.get_param_handle("tb.aadc.gain_err").set_cci_value(cci::cci_value(gain_error));
 			std::cout << "Measuring DNL with amplifier gain error = " << gain_error << " %" << std::endl;
 
 			// Measure DNL (sweep voltage at ADC input from -Vref to +Vref with fine step (Vref/2^n_bits)/10)
 			vin = -1.0*vref;
 			vin_code_dnl_tbl.clear();
+			uint16_t n_bits = m_broker.get_param_handle("tb.aadc.n_bits").get_cci_value().get_int();// Get AADC N bits configuration
 			for (unsigned int i = 0; i < (2 * pow(2, n_bits)) * fine_step + 1; i++) {
 				// Apply input voltage, reference and start adc conversion
 				aadc_vif->vin_drive.write(vin);
@@ -151,6 +154,7 @@ protected:
 			if (prev_code != aadc_vif->code.read()) {
 				
 				// Compute DNL at this point
+				uint16_t n_bits = m_broker.get_param_handle("tb.aadc.n_bits").get_cci_value().get_int();// Get AADC N bits configuration
 				dnl_in_bits = (cur_vin - prev_vin)/(vref / pow(2, n_bits));
 				if (aadc_vif->code.read() <= -1022) dnl_in_bits = 0;
 

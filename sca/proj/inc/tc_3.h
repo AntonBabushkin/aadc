@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "aadc_if.h"
-#include "aadc_cnfg.h"
 
 
 // This class is a SystemC module
@@ -17,16 +16,16 @@ public:
 
 	// Class (SystemC module) constructor
 	SC_HAS_PROCESS(tc_3);
-	tc_3(const sc_core::sc_module_name& name, bool* enable_checker = nullptr, aadc_if* aadc_vif_ = nullptr, aadc_cnfg* aadc_cfg_ = nullptr
+	tc_3(const sc_core::sc_module_name& name, bool* enable_checker = nullptr, aadc_if* aadc_vif_ = nullptr
 		, sca_core::sca_time st_base_ = sca_core::sca_time(1000.0, sc_core::SC_NS)
-		, uint16_t n_bits_ = 10, double vref_ = 1.0)
+		, double vref_ = 1.0)
 		: sc_module(name) // Construct parent
+		// Get CCI configuration handle specific for this module
+		, m_broker(cci::cci_get_broker())
 		// Initialize local variable
-		, aadc_cfg(aadc_cfg_)
 		, enable_checker(enable_checker)
 		, aadc_vif(aadc_vif_)
 		, st_base(st_base_)
-		, n_bits(n_bits_)
 		, vref(vref_)
 	{
 		*enable_checker = false;// Disable checker
@@ -46,14 +45,15 @@ public:
 
 	}
 
+private:
+	cci::cci_broker_handle m_broker; // CCI configuration handle
+
 protected:
 	// Local variables
-	aadc_cnfg* aadc_cfg;
 	bool* enable_checker;
 	aadc_if* aadc_vif;				// ADC virtual interface
 
 	sca_core::sca_time st_base;
-	uint16_t n_bits;
 	double vref;
 	int fine_step;
 	double vin = 0;
@@ -67,7 +67,9 @@ protected:
 	void do_stimuli() {
 
 		// Test case 3: Drive Vin and measure Code
-		aadc_cfg->integ_gain_error = 0.0;
+		
+		// Set gain error to 0.0
+		m_broker.get_param_handle("tb.aadc.gain_err").set_cci_value(cci::cci_value(0.0));
 
 		// Read input volatge vin from *.csv file
 		std::stringstream input_filename;
@@ -97,6 +99,7 @@ protected:
 			aadc_vif->start.write(false);
 
 			// Wait conversion finished
+			uint16_t n_bits = m_broker.get_param_handle("tb.aadc.n_bits").get_cci_value().get_int();// Get AADC N bits configuration
 			wait(n_bits - 1);
 		}
 		wait();// Wait one more clock cycle to let last conversion finish

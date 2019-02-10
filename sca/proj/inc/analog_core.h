@@ -33,14 +33,14 @@ public:
 	res_integr res_integr;
 	
 	// Class (SystemC module) constructor
-	analog_core(const sc_core::sc_module_name& name, aadc_cnfg* aadc_cfg_ = nullptr)
+	analog_core(const sc_core::sc_module_name& name)
 		: sc_module(name) // Construct parent
 		// ADC Analog Core components creation
 		, in_mux("in_mux")
 		, sub_adc("sub_adc")
 		, sampl_hold("sampl_hold")
 		, sub_dac("sub_dac")
-		, res_integr("res_integr", aadc_cfg_)
+		, res_integr("res_integr")
 	{
 		// ADC Analog Core components interconnection
 

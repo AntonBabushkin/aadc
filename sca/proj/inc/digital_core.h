@@ -10,21 +10,26 @@ public:
 
 	// Ports declaration
 	sc_core::sc_in<bool> clk;
-	sc_core::sc_in<bool> start;			// Start conversion
-	sc_core::sc_in<bool> p, q;
-	sc_core::sc_out<uint16_t> cnt;
-	sc_core::sc_out<bool> done;
-	sc_core::sc_out<int16_t> code, code_raw;
+	sc_core::sc_in<bool> start;						// Start conversion (strobe)
+	sc_core::sc_in<bool> p, q;						// 1.5-bit comparator output
+	sc_core::sc_out<uint16_t> cnt;					// Counter value
+	sc_core::sc_out<bool> done;						// End of conversion
+	sc_core::sc_out<int16_t> code;					// Conversion result code
+	sc_core::sc_out<int16_t> code_raw;
+
+	// 
+	bool conversion_running = false;
 
 	// Class (SystemC module) constructor
 	SC_HAS_PROCESS(digital_core);// Declare that this module have a process
-	digital_core(const sc_core::sc_module_name& name, uint16_t n_bits_ = 10)
+	digital_core(const sc_core::sc_module_name& name)
 		: sc_module(name) // Construct parent
-		, n_bits(n_bits_)
+		// Initialize parameters
+		, n_bits("n_bits", 10, "ADC resolution, in bits")
 	{
 		// Initialize
 		ctrl_cnt = 0;
-		adc_en = false;
+		conversion_running = false;
 
 		// Start SystemC threads
 
@@ -38,15 +43,13 @@ public:
 		sensitive << clk.pos();
 		dont_initialize();
 
-		// Print info
-		std::cout << "The module " << name << " was constructed"
-			<< " at time " << sc_core::sc_time_stamp() << std::endl;
 	}
+
+private:
+	cci::cci_param<int> n_bits;
 
 protected:
 	// Local variables
-	uint16_t n_bits;
-	bool adc_en;
 	uint16_t ctrl_cnt;
 	int16_t code_val, bit_val, bit_weight;
 
@@ -55,16 +58,16 @@ protected:
 		if (start.read()) {
 			done.write(false);
 			ctrl_cnt = 0;
-			adc_en = true;
+			conversion_running = true;
 		}
-		if (adc_en) {
+		if (conversion_running) {
 			cnt.write(ctrl_cnt);
 
 			if (ctrl_cnt == n_bits - 1) {
 				// Conversion finished
 				done.write(true);
 				ctrl_cnt = 0;
-				adc_en = false;
+				conversion_running = false;
 			}
 			else {
 				ctrl_cnt++;// Count up

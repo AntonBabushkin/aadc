@@ -92,15 +92,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;NOGDI;%(PreprocessorDefinitions);_USE_MATH_DEFINES</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SYSTEMC_AMS_HOME)\src;$(SYSTEMC_HOME)\src;..\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SYSTEMC_AMS_HOME)\src;$(SYSTEMC_HOME)\src;$(CCI_HOME)\src;..\inc</AdditionalIncludeDirectories>
       <RuntimeTypeInfo>Yes</RuntimeTypeInfo>
       <AdditionalOptions>/vmg %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);systemc.lib;systemc_ams.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SYSTEMC_HOME)\msvc10\SystemC\$(IntDir);$(SYSTEMC_AMS_HOME)\msvc80\$(IntDir);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);cciapi.lib;systemc.lib;systemc_ams.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SYSTEMC_HOME)\msvc10\SystemC\$(IntDir);$(SYSTEMC_AMS_HOME)\msvc80\$(IntDir);$(CCI_HOME)\msvc10\cci\libs\$(IntDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -124,7 +124,7 @@
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SYSTEMC_AMS_HOME)\src;$(SYSTEMC_HOME)\src;..\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SYSTEMC_AMS_HOME)\src;$(SYSTEMC_HOME)\src;$(CCI_HOME)\src;..\inc</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <MinimalRebuild>true</MinimalRebuild>
@@ -136,8 +136,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SYSTEMC_HOME)\msvc10\SystemC\$(IntDir);$(SYSTEMC_AMS_HOME)\msvc80\$(IntDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);systemc.lib;systemc_ams.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SYSTEMC_HOME)\msvc10\SystemC\$(IntDir);$(SYSTEMC_AMS_HOME)\msvc80\$(IntDir);$(CCI_HOME)\msvc10\cci\libs\$(IntDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);cciapi.lib;systemc.lib;systemc_ams.lib</AdditionalDependencies>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
